@@ -2,6 +2,7 @@
 #include <vector>
 #include <cmath>
 #include <algorithm>
+#include <iomanip>
 #include "Mersenne.h"
 
 using namespace std;
@@ -10,10 +11,12 @@ double theta_mersenne(vector<double> vals);
 double mean(vector<double> thetas);
 double stddev(vector<double> thetas, double mean);
 
-int main()
+int main(int argc, char * argv[])
 {
-    int amount = 1000;
-    uint32_t seed = 1247;
+    int amount = 10000;
+    uint32_t seed = stoi(string(argv[1]));
+    //cout << seed << endl;
+    // uint32_t seed = 1248;
     int runs = 40;
     double exponential_mean;
     double exponential_stddev;
@@ -46,7 +49,7 @@ int main()
 
     exponential_mean = mean(thetas);
 
-    cout<<exponential_mean;
+    cout<<fixed<<setprecision(10)<<exponential_mean;
 
     exponential_stddev = stddev(thetas, exponential_mean);
 
