@@ -38,21 +38,22 @@ def arithmetic_asian_price_crude(r, sigma, S0, K, T, n, N):
 
 def arithmetic_asian_price_control(r, sigma, S0, K, T, n, N):
     h = T / n
-    geo_price = asian_geo_price(r, sigma, S0, K, T, n)
+    european_price = european_call_price(S0, K, T, r, sigma)
+    
     Z = np.random.normal(size=(N, n))
     S = np.full((N, n), S0)
-
     for j in range(1, n):
-        S[:, j] = S[:, j - 1] * np.exp((r - 0.5 * sigma**2) * h + sigma * np.sqrt(h) * Z[:, j])
-
+        S[:, j] = S[:, j - 1] * np.exp((r - 0.5*sigma**2)*h + sigma*np.sqrt(h)*Z[:, j])
+    
     arith_mean = np.mean(S, axis=1)
-    geo_mean = np.exp(np.mean(np.log(S), axis=1))
-
-    Y = np.exp(-r * T) * np.maximum(arith_mean - K, 0)
-    C = np.exp(-r * T) * np.maximum(geo_mean - K, 0)
-
-    beta_hat = np.cov(Y, C)[0, 1] / np.var(C)
-    control_estimate = Y - beta_hat * (C - geo_price)
+    Y = np.exp(-r*T) * np.maximum(arith_mean - K, 0)
+    
+    S_T = S[:, -1]
+    C = np.exp(-r*T) * np.maximum(S_T - K, 0)
+    
+    beta = np.cov(Y, C)[0, 1] / np.var(C)
+    control_estimate = Y - beta * (C - european_price)
+    
     return np.mean(control_estimate), np.var(control_estimate, ddof=1)
 
 crude_estimates = []
@@ -69,3 +70,4 @@ var_Y_beta = np.var(control_estimates, ddof=1)
 
 print(f"Variance of Crude Monte Carlo (Var(Y)): {var_Y:.6f}")
 print(f"Variance of Control Variate Estimator (Var(Y(β))): {var_Y_beta:.6f}")
+
