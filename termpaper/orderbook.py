@@ -37,7 +37,6 @@ class OrderBook:
         self.trade_history = []
     
     def add_order(self, order):
-        """Add a new order to the book."""
         if order.side == 'bid':
             heapq.heappush(self.bids, (-order.price, order.timestamp, order))
         elif order.side == 'ask':
@@ -46,7 +45,6 @@ class OrderBook:
         self._match_orders()
     
     def cancel_order(self, order_id):
-        """Remove an order from the book."""
         if order_id in self.order_map:
             order = self.order_map[order_id]
             if order.side == 'bid':
@@ -58,7 +56,6 @@ class OrderBook:
             del self.order_map[order_id]
     
     def _match_orders(self):
-        """Match orders when bid >= ask"""
         while self.bids and self.asks and (-self.bids[0][0] >= self.asks[0][0]):
             best_bid = self.bids[0][2]
             best_ask = self.asks[0][2]
@@ -88,20 +85,17 @@ class OrderBook:
                 del self.order_map[best_ask.order_id]
     
     def get_depth(self, side, levels=5):
-        """Get top levels by side"""
         if side == 'bid':
             return sorted([(-p, t, o) for p, t, o in self.bids], reverse=True)[:levels]
         else:
             return sorted([(p, t, o) for p, t, o in self.asks])[:levels]
     
     def get_midprice(self):
-        """Calculate current midprice"""
         best_bid = -self.bids[0][0] if self.bids else None
         best_ask = self.asks[0][0] if self.asks else None
         return (best_bid + best_ask)/2 if (best_bid and best_ask) else None
 
     def display(self, levels=5):
-        """Formatted display for the order book"""
         print(f"\n------ {self.symbol} Order Book ------")
         print("Bids (Top {}):".format(levels))
         for bid in self.get_depth('bid', levels):
@@ -113,7 +107,6 @@ class OrderBook:
         print("-----------------------")
 
     def get_orderbook_state(self, levels=5):
-        """Returns current state with safe handling for empty books"""
         bids = sorted([(-p, t, o) for p, t, o in self.bids], reverse=True)[:levels]
         asks = sorted([(p, t, o) for p, t, o in self.asks])[:levels]
 
@@ -147,12 +140,10 @@ class EquityGBM:
         self.L = cholesky(self.rho_matrix, lower=True)
     
     def update_correlation(self, new_rho_matrix):
-        """Dynamically update correlation structure"""
         self.rho_matrix = new_rho_matrix
         self._setup_correlated_gbm()
     
     def step(self):
-        """Advance all prices by one time step"""
         z = np.random.normal(0, 1, len(self.symbols))
         epsilons = self.L @ z
 
@@ -164,7 +155,6 @@ class EquityGBM:
 
 
 class MarketMaker:
-    """Ensures continuous two-sided liquidity with tight spreads"""
     def __init__(self, symbols, spread=0.002, base_qty=10):  # Reduced from 0.01 to 0.002 (0.2%)
         self.symbols = symbols
         self.spread = spread
@@ -172,11 +162,9 @@ class MarketMaker:
         self.order_id_counter = 0
 
     def _calculate_spread(self, symbol):
-        """Calculate dynamic spread - tighter version"""
         return self.spread  # Can enhance with volatility-based calculation later
     
     def generate_orders(self, current_prices):
-        """Generate orders with tighter spreads"""
         orders = []
         for symbol in self.symbols:
             mid = current_prices[symbol]
@@ -203,7 +191,6 @@ class MarketMaker:
 
 
 def run_extended_simulation(time_steps=50, display_every=5):
-    """Run simulation with data collection for modeling"""
     # Initialize parameters
     symbols = ['S1', 'S2', 'S3']
     initial_prices = [100.0, 150.0, 80.0]
@@ -328,7 +315,6 @@ def run_extended_simulation(time_steps=50, display_every=5):
     
     # Post-simulation processing
     def create_dataframe(simulation_data):
-        """Convert simulation data to pandas DataFrame"""
         records = []
         for step_data in simulation_data['timesteps']:
             for symbol in symbols:
@@ -353,7 +339,6 @@ if __name__ == "__main__":
 
 
 def get_orderbook_state(self, levels=5):
-    """Returns current state as a dict suitable for JSON/DataFrame"""
     bids = sorted([(-p, t, o) for p, t, o in self.bids], reverse=True)[:levels]
     asks = sorted([(p, t, o) for p, t, o in self.asks])[:levels]
     
