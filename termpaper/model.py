@@ -27,7 +27,6 @@ class OrderBookAnalyzer:
         self.results = []
 
     def run_simulation(self, time_steps=1000):
-        """Run simulation and process features (unchanged from your original)"""
         self.raw_data = run_extended_simulation(time_steps=time_steps)
         records = []
         
@@ -45,7 +44,6 @@ class OrderBookAnalyzer:
         return self.features
 
     def _create_features(self, ob_state):
-        """Safe feature calculation with null checks"""
         # Safely calculate bid/ask volumes
         bid_vol = sum(b['qty'] for b in ob_state.get('bids', []))
         ask_vol = sum(a['qty'] for a in ob_state.get('asks', []))
@@ -66,7 +64,6 @@ class OrderBookAnalyzer:
         }
 
     def _rosenblatt_transform(self, X, order):
-        """Your original Rosenblatt transform (unchanged)"""
         transformed = np.zeros_like(X)
         n_samples, n_features = X.shape
         
@@ -80,7 +77,6 @@ class OrderBookAnalyzer:
         return transformed
 
     def _bivariate_ks_statistic(self, X, order):
-        """Your original KS statistic calculation (unchanged)"""
         transformed = self._rosenblatt_transform(X, order)
         n = len(X)
         ecdf = np.zeros(n)
@@ -97,7 +93,6 @@ class OrderBookAnalyzer:
 
     def bivariate_ks_test(self, X, n_permutations=100, alpha=0.05):
         """
-        Your original bivariate KS test (unchanged, but now accepts any input X).
         Returns KS stat, p-value, and rejection flag.
         """
         # Standardize features
@@ -126,9 +121,7 @@ class OrderBookAnalyzer:
         return D_n_star, p_value, D_n_star > critical_value
 
     def analyze_regimes(self):
-        """
-        New sliding window analysis using your original KS test.
-        """
+        """Sliding Window"""
         n_windows = (len(self.features) - self.window_size) // self.step_size
         for i in tqdm(range(n_windows)):
             start = i * self.step_size
@@ -170,7 +163,6 @@ class OrderBookAnalyzer:
         return pd.DataFrame(self.results)
 
     def plot_results(self, results_df):
-        """Visualization helper (unchanged)"""
         import matplotlib.pyplot as plt
         
         fig, ax = plt.subplots(3, 1, figsize=(12, 8), sharex=True)
@@ -182,7 +174,6 @@ class OrderBookAnalyzer:
         plt.savefig('regime_analysis.png')
 
     def _process_simulation_data(self, simulation_data):
-        """Convert simulation data to features DataFrame"""
         records = []
         for step_data in simulation_data['timesteps']:
             for symbol, ob_state in step_data['orderbooks'].items():
@@ -198,7 +189,6 @@ class OrderBookAnalyzer:
 
 def visualize_results(results_df, price_history):
     """
-    Visualize regime detection results for all three assets with:
     - Price series
     - Rolling volatility
     - KS statistics
